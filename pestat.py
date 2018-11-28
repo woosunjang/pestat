@@ -83,15 +83,17 @@ class pestat(object):
             return qstatdic
 
 
-def print_info(nodeinfo, runningjob, waitingjob):
+def print_info(nodeinfo, runningjob, waitingjob, free):
     cpu_thrshold_low = 0.5
     cpu_thrshold_high = 2.0
     mem_thrshold_low = 0.2
     mem_thrshold_high = 0.1
+    freenode = []
 
     print("-------------------------------------------------------------------------------------")
     print(" Host     Queue   State  Used  Total    Load    Memory    Free    JobID         User ")
     print("-------------------------------------------------------------------------------------")
+
     to_print = []
     for x in sorted(nodeinfo.items()):
         to_print.append(x)
@@ -186,6 +188,10 @@ def print_info(nodeinfo, runningjob, waitingjob):
             tmem_color = 2
             mem_color = 2
             cpu_color = 2
+            if free is True:
+                freenode.append(x[1])
+            else:
+                pass
         else:
             state = "Occup"
             state_color = 249
@@ -214,6 +220,20 @@ def print_info(nodeinfo, runningjob, waitingjob):
                     print("%5s   %7s   %7s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
                           % ("", "", "", "", "", "", "", "", jobidlist[i], userlist[i]))
 
+    if free is True:
+        print("")
+        print("-----------------------------------  Free Nodes  ------------------------------------")
+        print("           Hostname             Queue           Total CPU         Memory (GB)        ")
+        print("-------------------------------------------------------------------------------------")
+        for x in freenode:
+            print("      %15s          %7s           %5s               %5s"
+                  % (stylize('{:>15}'.format(x["host"]), fg(2)),
+                     stylize('{:>7}'.format(x["queue"].strip(".q")), fg(2)),
+                     stylize('{:>5}'.format(x["totl"]), fg(2)),
+                     stylize('{:>5}'.format(x["tmem"]), fg(2))
+                     ))
+
+
     # if len(waitingjob.keys()) != 0:
     #     pendinglist = []
     #     for x in sorted(waitingjob.items)
@@ -225,13 +245,14 @@ def print_info(nodeinfo, runningjob, waitingjob):
 def run_pestat(args):
     if args.machine == "yfhix":
         p = pestat.pestat_yfhix()
-        print_info(p.nodes, p.job_r, p.job_w)
+        print_info(p.nodes, p.job_r, p.job_w, args.free)
     return
 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-m", dest="machine", type=str, required=True)
+    parser.add_argument("-f", dest="free", action="store_true")
     parser.set_defaults(func=run_pestat)
     args = parser.parse_args()
 
