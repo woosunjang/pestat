@@ -91,16 +91,6 @@ def print_info(nodeinfo, runningjob, waitingjob):
     for x in to_print:
         jobidlist = []
         userlist = []
-        empty = int(x[1]["totl"]) - int(x[1]["used"])
-        if empty == 0:
-            state = "Full"
-            state_color = 249
-        elif empty == int(x[1]["totl"]):
-            state = "Idle"
-            state_color = 2
-        else:
-            state = "Occup"
-            state_color = 249
 
         if runningjob.get(x[1]["host"]) is not None:
             jobidlist.append(runningjob[x[1]["host"]]["jobid"])
@@ -130,11 +120,44 @@ def print_info(nodeinfo, runningjob, waitingjob):
         else:
             cpu_color = 249
 
+        empty = int(x[1]["totl"]) - int(x[1]["used"])
+        if empty == 0:
+            state = "Full"
+            state_color = 249
+            host_color = 249
+            queue_color = 249
+            used_color = 249
+            totl_color = 249
+            tmem_color = 249
+        elif empty == int(x[1]["totl"]):
+            state = "Idle"
+            state_color = 2
+            host_color = 2
+            queue_color = 2
+            used_color = 2
+            totl_color = 2
+            tmem_color = 2
+            mem_color = 2
+            cpu_color = 2
+        else:
+            state = "Occup"
+            state_color = 249
+            host_color = 249
+            queue_color = 249
+            used_color = 249
+            totl_color = 249
+            tmem_color = 249
+
         print("%5s   %7s   %5s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
-              % (x[1]["host"].strip("compute-"), x[1]["queue"].strip(".q"),
-                 stylize('{:>5}'.format(state), fg(state_color)), x[1]["used"], x[1]["totl"],
-                 stylize('{:>5}'.format(x[1]["load"]), fg(cpu_color)), x[1]["tmem"],
-                 stylize('{:>5}'.format(fmem), fg(mem_color)), jobidlist[0], userlist[0]))
+              % (stylize('{:>5}'.format(x[1]["host"].strip("compute-")), fg(host_color)),
+                 stylize('{:>7}'.format(x[1]["queue"].strip(".q")), fg(queue_color)),
+                 stylize('{:>5}'.format(state), fg(state_color)),
+                 stylize('{:>2}'.format(x[1]["used"]), fg(used_color)),
+                 stylize('{:>2}'.format(x[1]["totl"]), fg(totl_color)),
+                 stylize('{:>5}'.format(x[1]["load"]), fg(cpu_color)),
+                 stylize('{:>5}'.format(x[1]["tmem"]), fg(tmem_color)),
+                 stylize('{:>5}'.format(fmem), fg(mem_color)),
+                 jobidlist[0], userlist[0]))
 
         if len(jobidlist) >= 2:
             for i in range(len(jobidlist)):
