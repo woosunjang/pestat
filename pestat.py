@@ -5,7 +5,7 @@ import subprocess
 import argparse
 import sys
 import os
-from termcolor import colored
+from colored import stylize, fg
 
 
 class pestat(object):
@@ -77,6 +77,11 @@ class pestat(object):
 
 
 def print_info(nodeinfo, runningjob, waitingjob):
+    cpu_thrshold_low = 0.5
+    cpu_thrshold_high = 2.0
+    mem_thrshold_low = 0.2
+    mem_thrshold_high = 0.1
+
     print("-------------------------------------------------------------------------------------")
     print(" Host     Queue   State  Used  Total    Load    Memory    Free    JobID         User ")
     print("-------------------------------------------------------------------------------------")
@@ -89,10 +94,13 @@ def print_info(nodeinfo, runningjob, waitingjob):
         empty = int(x[1]["totl"]) - int(x[1]["used"])
         if empty == 0:
             state = "Full"
+            state_color = 249
         elif empty == int(x[1]["totl"]):
             state = "Idle"
+            state_color = 2
         else:
             state = "Occup"
+            state_color = 249
 
         if runningjob.get(x[1]["host"]) is not None:
             jobidlist.append(runningjob[x[1]["host"]]["jobid"])
@@ -106,10 +114,27 @@ def print_info(nodeinfo, runningjob, waitingjob):
         else:
             fmem = str(round(float(x[1]["tmem"]) - float(x[1]["umem"]), 2))
 
+        if mem_thrshold_high * float(x[1]["tmem"]) < float(fmem) <= mem_thrshold_low * float(x[1]["tmem"]):
+            mem_color = 11
+        elif float(fmem) <= mem_thrshold_high * float(x[1]["tmem"]):
+            mem_color = 1
+        else:
+            mem_color = 249
+
+        if x[1]["load"] == "-":
+            cpu_color = 1
+        elif float(x[1]["totl"]) + cpu_thrshold_high > float(x[1]["load"]) > float(x[1]["totl"]) + cpu_thrshold_low:
+            cpu_color = 11
+        elif float(x[1]["load"]) >= float(x[1]["totl"]) + cpu_thrshold_high:
+            cpu_color = 1
+        else:
+            cpu_color = 249
+
         print("%5s   %7s   %5s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
               % (x[1]["host"].strip("compute-"), x[1]["queue"].strip(".q"),
-                 state, x[1]["used"], x[1]["totl"], x[1]["load"],
-                 x[1]["tmem"], fmem, jobidlist[0], userlist[0]))
+                 stylize('{:>5}'.format(state), fg(state_color)), x[1]["used"], x[1]["totl"],
+                 stylize('{:>5}'.format(x[1]["load"]), fg(cpu_color)), x[1]["tmem"],
+                 stylize('{:>5}'.format(fmem), fg(mem_color)), jobidlist[0], userlist[0]))
 
         if len(jobidlist) >= 2:
             for i in range(len(jobidlist)):
