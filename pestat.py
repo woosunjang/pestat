@@ -234,12 +234,22 @@ def print_info(nodeinfo, runningjob, waitingjob, free):
                      ))
 
 
-    # if len(waitingjob.keys()) != 0:
-    #     pendinglist = []
-    #     for x in sorted(waitingjob.items)
-    #     print("----------------------------------  PENDING JOBS  -----------------------------------")
-    #     print("   Queue       JobID           Job          User                 Time                ")
-    #     print("-------------------------------------------------------------------------------------")
+    if len(waitingjob.keys()) != 0:
+        pendinglist = []
+        for x in sorted(waitingjob.items):
+            pendinglist.append(x)
+        print("----------------------------------  PENDING JOBS  -----------------------------------")
+        print("   Queue       JobID           Job          User                 Time                ")
+        print("-------------------------------------------------------------------------------------")
+        for x in pendinglist:
+            print("%5s   %5s   %15s   %12s   %10s %8s"
+                  % (x[1]["queue"].strip(".q"),
+                     x[1]["jobid"].strip(".q"),
+                     x[1]["name"].strip(".q"),
+                     x[1]["user"].strip(".q"),
+                     x[1]["sdate"].strip(".q"),
+                     x[1]["stime"].strip(".q")
+                     ))
 
 
 def run_pestat(args):
