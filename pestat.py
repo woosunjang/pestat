@@ -5,6 +5,7 @@ import subprocess
 import argparse
 import sys
 import os
+import re
 from colored import stylize, fg
 
 
@@ -30,6 +31,7 @@ class pestat(object):
             nodes = defaultdict()
             tmplist = []
             line = command.communicate()[0]
+            numcheck = re.compile('\d')
             for x in line.split(os.linesep):
                 if "global" in x:
                     pass
@@ -56,6 +58,11 @@ class pestat(object):
                                                                         "used": tmplist[i + 1].split()[2].split("/")[1],
                                                                         "totl": tmplist[i + 1].split()[2].split("/")[2],
                                                                         }
+                    if numcheck.match(tmplist[i + 1].split()[-1].split("/")[-1]) is None:
+                        nodes[int(tmplist[i].split()[0].split("-")[-1])]["note"] = tmplist[i + 1].split()[-1].split("/")[-1]
+                    else:
+                        nodes[int(tmplist[i].split()[0].split("-")[-1])]["note"] = ""
+
             return nodes
 
         @staticmethod
@@ -121,7 +128,47 @@ def print_info(nodeinfo, runningjob, waitingjob):
             cpu_color = 249
 
         empty = int(x[1]["totl"]) - int(x[1]["used"])
-        if empty == 0:
+        if x[1]["note"] != "":
+            if "E" in x[1]["note"]:
+                state = "DOWN"
+                state_color = 1
+                host_color = 1
+                queue_color = 1
+                used_color = 1
+                totl_color = 1
+                tmem_color = 1
+                mem_color = 1
+                cpu_color = 1
+            elif "u" in x[1]["note"]:
+                state = "UNKNOWN"
+                state_color = 93
+                host_color = 93
+                queue_color = 93
+                used_color = 93
+                totl_color = 93
+                tmem_color = 93
+                mem_color = 93
+                cpu_color = 93
+            elif "a" in x[1]["note"]:
+                state = "ALARM"
+                state_color = 93
+                host_color = 93
+                queue_color = 93
+                used_color = 93
+                totl_color = 93
+                tmem_color = 93
+                mem_color = 93
+            else:
+                state = x[1]["note"]
+                state_color = 93
+                host_color = 93
+                queue_color = 93
+                used_color = 93
+                totl_color = 93
+                tmem_color = 93
+                mem_color = 93
+                cpu_color = 93
+        elif empty == 0:
             state = "Full"
             state_color = 249
             host_color = 249
@@ -148,10 +195,10 @@ def print_info(nodeinfo, runningjob, waitingjob):
             totl_color = 249
             tmem_color = 249
 
-        print("%5s   %7s   %5s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
+        print("%5s   %7s   %7s   %2s   %2s    %5s    %5s    %5s    %5s  %12s"
               % (stylize('{:>5}'.format(x[1]["host"].strip("compute-")), fg(host_color)),
                  stylize('{:>7}'.format(x[1]["queue"].strip(".q")), fg(queue_color)),
-                 stylize('{:>5}'.format(state), fg(state_color)),
+                 stylize('{:>7}'.format(state), fg(state_color)),
                  stylize('{:>2}'.format(x[1]["used"]), fg(used_color)),
                  stylize('{:>2}'.format(x[1]["totl"]), fg(totl_color)),
                  stylize('{:>5}'.format(x[1]["load"]), fg(cpu_color)),
@@ -164,7 +211,7 @@ def print_info(nodeinfo, runningjob, waitingjob):
                 if i == 0:
                     pass
                 else:
-                    print("%5s   %7s   %5s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
+                    print("%5s   %7s   %7s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
                           % ("", "", "", "", "", "", "", "", jobidlist[i], userlist[i]))
 
     # if len(waitingjob.keys()) != 0:
