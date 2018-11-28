@@ -92,7 +92,7 @@ def print_info(nodeinfo, runningjob, waitingjob, free, muser):
     freenode = []
 
     print("-------------------------------------------------------------------------------------")
-    print(" Host     Queue   State  Used  Total    Load    Memory    Free    JobID         User ")
+    print(" Host    Queue    State   Used  Total   Load    Memory    Free    JobID         User")
     print("-------------------------------------------------------------------------------------")
 
     to_print = []
@@ -206,7 +206,7 @@ def print_info(nodeinfo, runningjob, waitingjob, free, muser):
             totl_color = 249
             tmem_color = 249
 
-        print("%5s   %7s   %7s   %2s   %2s    %5s    %5s    %5s    %5s  %12s"
+        print("%5s  %7s  %7s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
               % (stylize('{:>5}'.format(x[1]["host"].strip("compute-")), fg(host_color)),
                  stylize('{:>7}'.format(x[1]["queue"].strip(".q")), fg(queue_color)),
                  stylize('{:>7}'.format(state), fg(state_color)),
