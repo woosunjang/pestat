@@ -72,18 +72,19 @@ class pestat(object):
             line = command.communicate()[0]
             for x in line.split(os.linesep):
                 if "MASTER" in x:
-                    qstatdic[x.split()[7].split("@")[1].split(".")[0]] = {"jobid": x.split()[0],
-                                                                          "prior": x.split()[1],
-                                                                          "name": x.split()[2],
-                                                                          "user": x.split()[3],
-                                                                          "sdate": x.split()[5],
-                                                                          "stime": x.split()[6],
-                                                                          "queue": x.split()[7].split("@")[0],
-                                                                          }
+                    qstatdic[x.split()[0]] = {"host": x.split()[7].split("@")[1].split(".")[0],
+                                              "jobid": x.split()[0],
+                                              "prior": x.split()[1],
+                                              "name": x.split()[2],
+                                              "user": x.split()[3],
+                                              "sdate": x.split()[5],
+                                              "stime": x.split()[6],
+                                              "queue": x.split()[7].split("@")[0],
+                                              }
             return qstatdic
 
 
-def print_info(nodeinfo, runningjob, waitingjob, free):
+def print_info(nodeinfo, runningjob, waitingjob, free, muser):
     cpu_thrshold_low = 0.5
     cpu_thrshold_high = 2.0
     mem_thrshold_low = 0.2
@@ -100,13 +101,17 @@ def print_info(nodeinfo, runningjob, waitingjob, free):
     for x in to_print:
         jobidlist = []
         userlist = []
+        for keys in runningjob.keys():
+            if runningjob[keys]["host"] == x[1]["host"]:
+                jobidlist.append(runningjob[keys]["jobid"])
+                userlist.append(runningjob[keys]["user"])
+            else:
+                pass
 
-        if runningjob.get(x[1]["host"]) is not None:
-            jobidlist.append(runningjob[x[1]["host"]]["jobid"])
-            userlist.append(runningjob[x[1]["host"]]["user"])
-        else:
-            jobidlist.append("")
-            userlist.append("")
+        if len(jobidlist) == 0:
+            jobidlist = [""]
+        if len(userlist) == 0:
+            userlist = [""]
 
         if x[1]["umem"] == "-":
             fmem = x[1]["tmem"]
@@ -212,13 +217,13 @@ def print_info(nodeinfo, runningjob, waitingjob, free):
                  stylize('{:>5}'.format(fmem), fg(mem_color)),
                  jobidlist[0], userlist[0]))
 
-        if len(jobidlist) >= 2:
-            for i in range(len(jobidlist)):
-                if i == 0:
-                    pass
-                else:
-                    print("%5s   %7s   %7s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
-                          % ("", "", "", "", "", "", "", "", jobidlist[i], userlist[i]))
+        if muser is True:
+            if len(jobidlist) >= 2:
+                for i in range(len(jobidlist)):
+                    if i == 0:
+                        pass
+                    else:
+                        print("%71s  %12s" % (jobidlist[i], userlist[i]))
 
     if free is True:
         print("")
@@ -232,7 +237,6 @@ def print_info(nodeinfo, runningjob, waitingjob, free):
                      stylize('{:>5}'.format(x["totl"]), fg(2)),
                      stylize('{:>5}'.format(x["tmem"]), fg(2))
                      ))
-
 
     # if len(waitingjob.keys()) != 0:
     #     pendinglist = []
@@ -255,7 +259,7 @@ def print_info(nodeinfo, runningjob, waitingjob, free):
 def run_pestat(args):
     if args.machine == "yfhix":
         p = pestat.pestat_yfhix()
-        print_info(p.nodes, p.job_r, p.job_w, args.free)
+        print_info(p.nodes, p.job_r, p.job_w, args.free, args.muser)
     return
 
 
@@ -263,6 +267,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-m", dest="machine", type=str, required=True)
     parser.add_argument("-f", dest="free", action="store_true")
+    parser.add_argument("-u", dest="muser", action="store_true")
     parser.set_defaults(func=run_pestat)
     args = parser.parse_args()
 
