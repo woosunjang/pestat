@@ -125,6 +125,8 @@ def print_info(nodeinfo, runningjob, waitingjob, free, muser):
         else:
             mem_color = 249
 
+        if x[1]["load"][-1] == "K":
+            x[1]["load"] = str(float(x[1]["load"].strip("K")) * 1000)
         if x[1]["load"] == "-":
             cpu_color = 1
         elif float(x[1]["totl"]) + cpu_thrshold_high > float(x[1]["load"]) > float(x[1]["totl"]) + cpu_thrshold_low:
@@ -206,13 +208,13 @@ def print_info(nodeinfo, runningjob, waitingjob, free, muser):
             totl_color = 249
             tmem_color = 249
 
-        print("%5s  %7s  %7s    %2s    %2s    %5s    %5s    %5s    %5s  %12s"
+        print("%5s  %7s  %7s    %2s    %2s   %6s    %5s    %5s    %5s  %12s"
               % (stylize('{:>5}'.format(x[1]["host"].strip("compute-")), fg(host_color)),
                  stylize('{:>7}'.format(x[1]["queue"].strip(".q")), fg(queue_color)),
                  stylize('{:>7}'.format(state), fg(state_color)),
                  stylize('{:>2}'.format(x[1]["used"]), fg(used_color)),
                  stylize('{:>2}'.format(x[1]["totl"]), fg(totl_color)),
-                 stylize('{:>5}'.format(x[1]["load"]), fg(cpu_color)),
+                 stylize('{:>6}'.format(x[1]["load"]), fg(cpu_color)),
                  stylize('{:>5}'.format(x[1]["tmem"]), fg(tmem_color)),
                  stylize('{:>5}'.format(fmem), fg(mem_color)),
                  jobidlist[0], userlist[0]))
