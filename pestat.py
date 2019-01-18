@@ -90,6 +90,7 @@ def print_info(nodeinfo, runningjob, waitingjob, free, muser):
     mem_thrshold_low = 0.2
     mem_thrshold_high = 0.1
     freenode = []
+    occupnode = []
 
     print("-------------------------------------------------------------------------------------")
     print(" Host    Queue    State   Used  Total   Load    Memory    Free    JobID         User")
@@ -207,6 +208,10 @@ def print_info(nodeinfo, runningjob, waitingjob, free, muser):
             used_color = 249
             totl_color = 249
             tmem_color = 249
+            if free is True:
+                occupnode.append(x[1])
+            else:
+                pass
 
         print("%5s  %7s  %7s    %2s    %2s   %6s    %5s    %5s    %5s  %12s"
               % (stylize('{:>5}'.format(x[1]["host"].strip("compute-")), fg(host_color)),
@@ -230,7 +235,7 @@ def print_info(nodeinfo, runningjob, waitingjob, free, muser):
     if free is True:
         print("")
         print("-----------------------------------  Free Nodes  ------------------------------------")
-        print("           Hostname             Queue           Total CPU         Memory (GB)        ")
+        print("           Hostname             Queue           CPU Avail         Memory (GB)        ")
         print("-------------------------------------------------------------------------------------")
         for x in freenode:
             print("      %15s          %7s           %5s               %5s"
@@ -238,6 +243,15 @@ def print_info(nodeinfo, runningjob, waitingjob, free, muser):
                      stylize('{:>7}'.format(x["queue"].strip(".q")), fg(2)),
                      stylize('{:>5}'.format(x["totl"]), fg(2)),
                      stylize('{:>5}'.format(x["tmem"]), fg(2))
+                     ))
+
+        print("------------------------------  Partially Free Nodes  -------------------------------")
+        for x in occupnode:
+            print("      %15s          %7s           %5s               %5s"
+                  % (stylize('{:>15}'.format(x["host"]), fg(4)),
+                     stylize('{:>7}'.format(x["queue"].strip(".q")), fg(4)),
+                     stylize('{:>5}'.format(str(int(x["totl"]) - int(x["used"]))), fg(4)),
+                     stylize('{:>5}'.format(x["tmem"]), fg(4))
                      ))
 
     # if len(waitingjob.keys()) != 0:
